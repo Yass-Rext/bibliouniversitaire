@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}{{ livre.titre }} - Fiche détaillée{% endblock %}
+
+{% block content %}
+<div class="mb-3">
+    <a href="{% url 'liste_livres' %}" class="btn btn-outline-secondary btn-sm">&larr; Retour au catalogue</a>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <h1 class="display-6 font-weight-bold">{{ livre.titre }}</h1>
+        <h4 class="text-primary mb-3">Par {{ livre.auteur }}</h4>
+
+        <div class="row my-3">
+            <div class="col-md-6">
+                <p><strong>Code ISBN :</strong> {{ livre.isbn }}</p>
+                <p><strong>Genre(s) :</strong> 
+                    {% for g in livre.genre.all %}
+                        <span class="badge bg-info text-dark">{{ g.nom }}</span>
+                    {% empty %}
+                        <span class="text-muted">Non spécifié</span>
+                    {% endfor %}
+                </p>
+            </div>
+            <div class="col-md-6">
+                <div class="p-3 bg-light rounded text-center">
+                    <h5>Disponibilité globale</h5>
+                    {% if nombre_disponibles > 0 %}
+                        <span class="badge bg-success fs-6">{{ nombre_disponibles }} disponible(s)</span>
+                    {% else %}
+                        <span class="badge bg-danger fs-6">Aucun exemplaire disponible</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <h5 class="mt-4">Résumé</h5>
+        <p class="card-text">{{ livre.resume|linebreaks }}</p>
+    </div>
+</div>
+
+<!-- Section Exemplaires -->
+<h3 class="mb-3">Exemplaires physiques en bibliothèque</h3>
+<div class="table-responsive">
+    <table class="table table-striped align-middle bg-white shadow-sm rounded">
+        <thead class="table-dark">
+            <tr>
+                <th>N° d'exemplaire / Code</th>
+                <th>Statut</th>
+                <th>Date de retour prévue</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for ex in exemplaires %}
+                <tr>
+                    <td><code>{{ ex.numero_exemplaire }}</code></td>
+                    <td>
+                        <!-- Utilisation deget_status_display pour afficher 'Disponible' au lieu de 'd' -->
+                        {% if ex.status == 'd' %}
+                            <span class="badge bg-success">{{ ex.get_status_display }}</span>
+                        {% elif ex.status == 'e' %}
+                            <span class="badge bg-warning text-dark">{{ ex.get_status_display }}</span>
+                        {% elif ex.status == 'r' %}
+                            <span class="badge bg-info text-dark">{{ ex.get_status_display }}</span>
+                        {% else %}
+                            <span class="badge bg-secondary">{{ ex.get_status_display }}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if ex.status == 'e' and ex.date_retour %}
+                            {{ ex.date_retour|date:"d/m/Y" }}
+                        {% else %}
+                            <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="3" class="text-center text-muted">Aucun exemplaire enregistré pour ce livre.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Catalogue des livres - BiblioUniv{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8 mx-auto">
+        <h1 class="text-center mb-4">Rechercher dans le Catalogue</h1>
+        
+        <!-- Formulaire de recherche -->
+        <form method="get" action="{% url 'liste_livres' %}" class="d-flex gap-2">
+            <input type="text" name="q" value="{{ query }}" class="form-control form-control-lg" placeholder="Titre, auteur, ISBN...">
+            <button type="submit" class="btn btn-primary btn-lg">Rechercher</button>
+            {% if query %}
+                <a href="{% url 'liste_livres' %}" class="btn btn-outline-secondary btn-lg">Réinitialiser</a>
+            {% endif %}
+        </form>
+    </div>
+</div>
+
+<!-- Liste des livres -->
+<div class="row row-cols-1 row-cols-md-2 g-4">
+    {% for livre in livres %}
+        <div class="col">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <a href="{% url 'detail_livre' pk=livre.pk %}" class="text-decoration-none text-dark">
+                            {{ livre.titre }}
+                        </a>
+                    </h5>
+                    <h6 class="card-subtitle mb-2 text-muted">
+                        ✍️ {{ livre.auteur|default:"Auteur inconnu" }}
+                    </h6>
+                    <p class="card-text text-truncate">{{ livre.resume }}</p>
+                    
+                    <!-- Badges des genres -->
+                    <div class="mb-2">
+                        {% for g in livre.genre.all %}
+                            <span class="badge bg-secondary">{{ g.nom }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent d-flex justify-content-between align-items-center">
+                    <small class="text-muted">ISBN: {{ livre.isbn }}</small>
+                    <a href="{% url 'detail_livre' pk=livre.pk %}" class="btn btn-sm btn-outline-primary">
+                        Voir exemplaires &rarr;
+                    </a>
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <div class="col-12 text-center py-5">
+            <p class="fs-4 text-muted">Aucun livre ne correspond à votre recherche.</p>
+        </div>
+    {% endfor %}
+</div>
+
+<!-- Pagination -->
+{% if is_paginated %}
+    <nav class="mt-5">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-item page-link" href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}">Précédent</a>
+                </li>
+            {% endif %}
+
+            <li class="page-item disabled">
+                <span class="page-link">Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}</span>
+            </li>
+
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}">Suivant</a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+{% endif %}
+{% endblock %}

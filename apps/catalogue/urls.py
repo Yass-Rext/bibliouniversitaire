@@ -17,12 +17,19 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from django.views.defaults import server_error
-from .views import index
+from . import views
 from django.urls import include
 
+
+
 urlpatterns = [
-    path('', index, name="indexe-catalogue")
-   
+    path('', views.index, name='index'),  # Page d'accueil
+    # Route pour la liste des livres (ex: /catalogue/livres/)
+    path('livres/', views.liste_livres, name='liste_livres'),
+    path('livre/ajouter/', views.ajouter_livre, name='ajouter_livre'),
+    
+    # Route pour le détail d'un livre (ex: /catalogue/livre/1/)
+    path('livre/<int:pk>/', views.detail_livre, name='detail_livre'),
 ]
 
 
